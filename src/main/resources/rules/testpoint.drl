@@ -1,0 +1,13 @@
+import com.emrubik.springboot.droolstest.TestDomain;  
+import com.emrubik.springboot.droolstest.TestControl;  
+  
+rule birthdayPoint  
+    salience 100  
+    lock-on-active true  
+    when  
+        $testDomain : TestDomain(map.get("month") > 5)  
+    then  
+        TestControl testControl = new TestControl();
+        testControl.testControl("birthdayPoint");
+        $testDomain.recordPointLog("birthdayPoint");  
+end  

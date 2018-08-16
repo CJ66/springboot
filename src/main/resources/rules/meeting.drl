@@ -1,0 +1,43 @@
+import com.emrubik.domain.module.drools.RuleDomain;   
+import com.emrubik.intel.build.linkage.device.control.DoorControl;
+import com.emrubik.intel.build.linkage.device.control.LightingControl;
+import com.emrubik.intel.build.linkage.device.control.AirSwitchControl;
+
+rule meetingBegin  
+    salience 100  
+    lock-on-active true  
+    when  
+        $ruleDomain : RuleDomain(map.get("meetingBegin.beginTime") < 600 && map.get("meetingEnd.endTime") > 300)
+    then  
+        DoorControl doorControl = new DoorControl();
+        doorControl.commonExecute($ruleDomain,"meetingBegin.door");
+        LightingControl lightingControl = new LightingControl();
+        lightingControl.commonExecute($ruleDomain,"meetingBegin.lighting");
+        $ruleDomain.recordPointLog("meetingBegin");  
+end
+
+rule meetingAirCondition
+	salience 99
+	lock-on-active true  
+    when  
+        $ruleDomain : RuleDomain(map.get("meetingAirCondition.temperature") > 28 && map.get("meetingAirCondition.beginTime") < 600)  
+    then  
+        AirSwitchControl airSwitchControl = new AirSwitchControl();
+        airSwitchControl.commonExecute($ruleDomain,"meetingAirCondition.airSwitch");
+        $ruleDomain.recordPointLog("meetingAirCondition");  
+end
+
+rule meetingEnd
+	salience 98
+	lock-on-active true  
+    when  
+        $ruleDomain : RuleDomain(map.get("meetingBegin.beginTime") > 600 && map.get("meetingEnd.endTime") > 300)
+    then  
+        AirSwitchControl airSwitchControl = new AirSwitchControl();
+        airSwitchControl.commonExecute($ruleDomain,"meetingEnd.airSwitch");
+        DoorControl doorControl = new DoorControl();
+        doorControl.commonExecute($ruleDomain,"meetingEnd.door");
+        LightingControl lightingControl = new LightingControl();
+        lightingControl.commonExecute($ruleDomain,"meetingEnd.lighting");
+        $ruleDomain.recordPointLog("meetingEnd");  
+end

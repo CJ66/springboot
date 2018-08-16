@@ -1,0 +1,30 @@
+import com.emrubik.domain.module.drools.RuleDomain;
+import com.emrubik.intel.build.linkage.device.control.LightingControl;
+import com.emrubik.intel.build.linkage.device.control.AirSwitchControl;
+
+rule meetingBegin  
+    salience 100  
+    lock-on-active true  
+    when  
+        $ruleDomain : RuleDomain(map.get("meetingBegin.beginTime") < 600 && map.get("meetingBegin.endTime") > 300)  
+    then  
+        AirSwitchControl airSwitchControl = new AirSwitchControl();
+        airSwitchControl.execute($ruleDomain.getUnitGroup(),$ruleDomain.getConditionMap().get("meetingAirCondition.airSwitch"));
+        LightingControl lightingControl = new LightingControl();
+        lightingControl.execute($ruleDomain.getUnitGroup(),$ruleDomain.getConditionMap().get("meetingBegin.lighting"));
+        $ruleDomain.recordPointLog("meetingBegin");  
+end
+
+
+rule meetingEnd
+	salience 98
+	lock-on-active true  
+    when  
+        $ruleDomain : RuleDomain(map.get("meetingEnd.beginTime") > 600 && map.get("meetingEnd.endTime") > 300)  
+    then  
+        AirSwitchControl airSwitchControl = new AirSwitchControl();
+        airSwitchControl.execute($ruleDomain.getUnitGroup(),$ruleDomain.getConditionMap().get("meetingEnd.airSwitch"));
+        LightingControl lightingControl = new LightingControl();
+        lightingControl.execute($ruleDomain.getUnitGroup(),$ruleDomain.getConditionMap().get("meetingEnd.lighting"));
+        $ruleDomain.recordPointLog("meetingEnd");  
+end

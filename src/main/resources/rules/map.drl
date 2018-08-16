@@ -1,0 +1,17 @@
+import com.emrubik.springboot.droolsx.RuleDomain;   
+import com.emrubik.springboot.droolsx.DoorControl;
+import com.emrubik.springboot.droolsx.LightingControl;
+import com.emrubik.springboot.droolsx.AirSwitchControl;
+
+rule meetingBegin  
+    salience 100  
+    lock-on-active true  
+    when  
+        $ruleDomain : RuleDomain(map.get("meetingBegin.beginTime") < 600)  
+    then  
+        DoorControl doorControl = new DoorControl();
+        doorControl.execute($ruleDomain.getUnitGroup(),$ruleDomain.getConditionMap().get("meetingBegin.door"));
+        LightingControl lightingControl = new LightingControl();
+        lightingControl.execute($ruleDomain.getUnitGroup(),$ruleDomain.getConditionMap().get("meetingBegin.lighting"));
+        $ruleDomain.recordPointLog("meetingBegin");  
+end
